@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Friends Barbershop – Landstuhl | Haarschnitt & Bartpflege</title>
 <meta name="description" content="Friends Barbershop in Landstuhl – moderner Barbershop mit Stil. Haarschnitte, Bartpflege und mehr. Kaiserstraße 24, 66849 Landstuhl.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- Schriften lokal gehostet (DSGVO: keine Verbindung zu Google-Servern) -->
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
 :root{
   --black:#0c0c0e;
@@ -44,15 +43,15 @@ nav{
 }
 /* Hintergrund/Blur liegt auf ::before statt auf nav selbst:
    backdrop-filter auf nav würde das fixe Drawer-Menü an die Leiste koppeln */
+/* Solider dunkler Hintergrund statt backdrop-filter:
+   Der dauerhafte Blur hat den GPU-Renderer bei langen Seiten zum Absturz gebracht */
 nav::before{
   content:'';position:absolute;inset:0;z-index:-1;
-  background:rgba(12,12,14,.85);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
-  opacity:0;transition:opacity .4s;
+  background:linear-gradient(180deg,rgba(12,12,14,.88) 0%,rgba(12,12,14,.78) 100%);
+  transition:background .4s;
 }
 nav.scrolled{padding:.7rem 5vw;box-shadow:0 1px 0 var(--gold-dim)}
-nav.scrolled::before{opacity:1}
+nav.scrolled::before{background:rgba(10,10,12,.96)}
 .nav-logo{
   font-family:var(--serif);font-size:1.5rem;font-weight:600;
   color:var(--warm-white);text-decoration:none;letter-spacing:.12em;
@@ -102,8 +101,7 @@ header{
 .hero-bg{
   position:absolute;inset:-12% 0;
   background:
-    linear-gradient(180deg,rgba(12,12,14,.55) 0%,rgba(12,12,14,.35) 40%,rgba(12,12,14,.92) 100%),
-    url('images/hero.jpg') center 35%/cover no-repeat,
+    linear-gradient(180deg,rgba(12,12,14,.35) 0%,rgba(12,12,14,.15) 40%,rgba(12,12,14,.9) 100%),
     radial-gradient(ellipse 80% 55% at 50% 0%,#3a3325 0%,#17151199 45%,var(--black) 100%);
   will-change:transform;
 }
@@ -147,8 +145,10 @@ header{
 .hex-lights path:nth-child(3n){animation-delay:2.4s}
 @keyframes hexGlow{0%,100%{opacity:.95}50%{opacity:.55}}
 .scroll-hint{
-  position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);z-index:2;
+  position:absolute;bottom:2.2rem;left:0;right:0;z-index:2;
+  display:block;text-align:center;
   color:var(--gold);font-size:.7rem;letter-spacing:.4em;text-transform:uppercase;
+  text-indent:.4em; /* gleicht das letter-spacing hinterm letzten Buchstaben aus */
   opacity:0;animation:fadeUp 1s 1.6s forwards;text-decoration:none;
 }
 .scroll-hint::after{
@@ -185,19 +185,47 @@ h2{
 .about-text p{margin-bottom:1.2rem;color:var(--text-dim);font-size:1.05rem}
 .about-text strong{color:var(--warm-white);font-weight:500}
 .about-visual{
-  position:relative;aspect-ratio:4/5;
+  position:relative;aspect-ratio:4/3;
   background:
-    linear-gradient(180deg,rgba(12,12,14,.15),rgba(12,12,14,.55)),
-    url('images/hero.jpg') 70% center/cover no-repeat,
+    url('images/hero.jpg') center/cover no-repeat,
     linear-gradient(160deg,#26221a,#141417);
-  border:1px solid var(--gold-dim);
-}
-.about-visual::before{
-  content:'';position:absolute;inset:14px;border:1px solid var(--gold-dim);pointer-events:none;
 }
 .about-stats{display:flex;gap:3rem;margin-top:2.5rem;flex-wrap:wrap}
 .stat .num{font-family:var(--serif);font-size:2.6rem;color:var(--gold);font-weight:600;line-height:1}
 .stat .lbl{font-size:.75rem;letter-spacing:.25em;text-transform:uppercase;color:var(--text-dim);margin-top:.4rem}
+
+/* kunstwerke / galerie */
+.art-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:3rem}
+.art-item{
+  position:relative;aspect-ratio:1;
+  background:linear-gradient(160deg,#1b1a16,#111013);
+  background-size:cover;background-position:center;
+  border:1px solid rgba(201,162,74,.18);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;
+  transition:transform .35s,border-color .35s;
+}
+.art-item:hover{transform:scale(1.02);border-color:var(--gold)}
+.art-item svg{width:28px;height:28px;stroke:var(--gold);opacity:.4}
+.art-item .ph-num{font-family:var(--serif);font-size:1.4rem;color:rgba(201,162,74,.45)}
+.art-item.has-img svg,.art-item.has-img .ph-num{display:none}
+.art-item.has-img{cursor:pointer}
+
+/* lightbox */
+.lightbox{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:4vmin;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.lightbox.open{opacity:1;pointer-events:auto}
+.lightbox img{
+  max-width:100%;max-height:100%;
+  border:1px solid var(--gold-dim);
+  box-shadow:0 24px 90px rgba(0,0,0,.85);
+  transform:scale(.92);transition:transform .3s;
+}
+.lightbox.open img{transform:scale(1)}
 
 /* services */
 .services{background:var(--coal)}
@@ -223,9 +251,8 @@ h2{
 .strip{
   padding:0;height:340px;overflow:hidden;position:relative;
   background:
-    linear-gradient(rgba(12,12,14,.45),rgba(12,12,14,.45)),
-    url('images/hero.jpg') center/cover no-repeat fixed,
-    linear-gradient(120deg,#221e15,#0c0c0e);
+    radial-gradient(ellipse 70% 90% at 50% 100%,#2a2418 0%,transparent 70%),
+    linear-gradient(120deg,#1a1712,#0c0c0e);
   display:flex;align-items:center;justify-content:center;
 }
 .strip blockquote{
@@ -272,9 +299,18 @@ h2{
 .social-btn:hover{background:var(--gold);color:var(--black);border-color:var(--gold)}
 .social-btn:hover svg *{stroke:var(--black)}
 .map-wrap{
-  margin-top:4rem;border:1px solid var(--gold-dim);line-height:0;
+  margin-top:4rem;border:1px solid var(--gold-dim);line-height:0;position:relative;
 }
 .map-wrap iframe{width:100%;height:380px;border:0}
+.map-consent{
+  position:absolute;inset:0;z-index:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.4rem;
+  background:linear-gradient(160deg,#1b1a16,#0e0e10);
+  text-align:center;padding:2rem;line-height:1.7;
+}
+.map-consent p{font-size:.9rem;color:var(--text-dim);max-width:480px}
+.map-consent a{color:var(--gold-light)}
+.map-consent .btn{cursor:pointer;font-family:var(--sans)}
 .map-actions{margin-top:1.5rem;text-align:center}
 
 /* footer */
@@ -288,6 +324,10 @@ footer{
 .footer-insta svg{width:26px;height:26px;transition:transform .3s}
 .footer-insta:hover svg{transform:scale(1.2) rotate(6deg)}
 footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing:.08em}
+.footer-legal{margin-top:.9rem;font-size:.82rem;letter-spacing:.12em}
+.footer-legal a{color:var(--text-dim);text-decoration:none;transition:color .3s}
+.footer-legal a:hover{color:var(--gold-light)}
+.footer-legal span{color:var(--text-dim);margin:0 .5rem}
 
 /* responsive */
 @media(max-width:860px){
@@ -311,7 +351,6 @@ footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing
   .burger{display:flex}
   section{padding:5rem 7vw}
   .service-desc{display:none}
-  .strip{background-attachment:scroll}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -325,6 +364,7 @@ footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing
   <a class="nav-logo" href="#top">FRIENDS<span> BARBERSHOP</span></a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#about" data-i18n="nav.about">Über uns</a></li>
+    <li><a href="#kunstwerke" data-i18n="nav.art">Kunstwerke</a></li>
     <li><a href="#services" data-i18n="nav.services">Leistungen</a></li>
     <li><a href="#contact" data-i18n="nav.contact">Kontakt</a></li>
     <li>
@@ -368,7 +408,7 @@ footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing
   <div class="hero-content">
     <span class="hero-eyebrow">Landstuhl · Kaiserstraße 24</span>
     <h1>Friends <em>Barbershop</em></h1>
-    <p class="hero-sub" data-i18n="hero.sub">Präzise Schnitte, klassische Bartpflege und ein Ambiente, in dem man gerne sitzen bleibt. Dein Barbershop mitten in Landstuhl.</p>
+    <p class="hero-sub" data-i18n="hero.sub">Frischer Schnitt, sauberer Bart – mitten in Landstuhl. Komm vorbei oder ruf kurz durch.</p>
     <div class="hero-cta">
       <a class="btn btn-gold" href="tel:+491703591513" data-i18n="hero.cta1">Termin vereinbaren</a>
       <a class="btn btn-ghost" href="#services" data-i18n="hero.cta2">Leistungen</a>
@@ -381,17 +421,38 @@ footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing
   <div class="section-inner about-grid">
     <div class="about-text">
       <span class="section-tag reveal" data-i18n="about.tag">Über uns</span>
-      <h2 class="reveal" data-i18n="about.h2">Handwerk trifft<br>Atmosphäre</h2>
+      <h2 class="reveal" data-i18n="about.h2">Bei uns bist du<br>unter Freunden</h2>
       <div class="divider reveal"></div>
-      <p class="reveal d1" data-i18n="about.p1">Bei <strong>Friends Barbershop</strong> bekommst du mehr als einen Haarschnitt. Unter den goldenen Hexagon-Lichtern unseres Salons nehmen wir uns Zeit für jedes Detail – vom klassischen Fade bis zur heißen Rasur mit dem Messer.</p>
-      <p class="reveal d2" data-i18n="about.p2">Modernes Barbering, ehrliche Beratung und eine Atmosphäre unter Freunden – dafür stehen wir. Komm vorbei, lehn dich zurück und verlass den Stuhl mit einem Lächeln.</p>
+      <p class="reveal d1" data-i18n="about.p1">Der Name ist Programm: Bei <strong>Friends</strong> wirst du nicht abgefertigt, sondern wie ein Kumpel empfangen. Ob Fade, Messer-Rasur oder einfach nachschneiden – wir nehmen uns Zeit dafür.</p>
+      <p class="reveal d2" data-i18n="about.p2">Sieben Stühle, ein eingespieltes Team und meistens läuft gute Musik. Komm mit Termin oder einfach spontan vorbei.</p>
       <div class="about-stats reveal d3">
-        <div class="stat"><div class="num">100%</div><div class="lbl" data-i18n="about.stat1">Leidenschaft</div></div>
+        <div class="stat"><div class="num">5,0 ★</div><div class="lbl" data-i18n="about.stat1">Google-Bewertung</div></div>
         <div class="stat"><div class="num">7</div><div class="lbl" data-i18n="about.stat2">Barber-Stühle</div></div>
-        <div class="stat"><div class="num">★★★★★</div><div class="lbl" data-i18n="about.stat3">Für unsere Gäste</div></div>
+        <div class="stat"><div class="num">6</div><div class="lbl" data-i18n="about.stat3">Tage die Woche offen</div></div>
       </div>
     </div>
     <div class="about-visual reveal d2" role="img" aria-label="Innenansicht des Friends Barbershop"></div>
+  </div>
+</section>
+
+<!-- Eigene Bilder: einfach als images/kunst1.jpg bis images/kunst9.jpg speichern -->
+<section id="kunstwerke">
+  <div class="section-inner">
+    <span class="section-tag reveal" data-i18n="gallery.tag">Galerie</span>
+    <h2 class="reveal" data-i18n="gallery.h2">Kunstwerke</h2>
+    <div class="divider reveal"></div>
+    <p class="reveal d1" data-i18n="gallery.sub">Frisuren, Designs und mehr aus dem Laden.</p>
+    <div class="art-grid">
+      <div class="art-item reveal" data-src="images/kunst1.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">01</span></div>
+      <div class="art-item reveal d1" data-src="images/kunst2.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">02</span></div>
+      <div class="art-item reveal d2" data-src="images/kunst3.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">03</span></div>
+      <div class="art-item reveal" data-src="images/kunst4.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">04</span></div>
+      <div class="art-item reveal d1" data-src="images/kunst5.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">05</span></div>
+      <div class="art-item reveal d2" data-src="images/kunst6.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">06</span></div>
+      <div class="art-item reveal" data-src="images/kunst7.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">07</span></div>
+      <div class="art-item reveal d1" data-src="images/kunst8.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">08</span></div>
+      <div class="art-item reveal d2" data-src="images/kunst9.jpg"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.5 8.5 20 20M8.5 15.5 20 4"/></svg><span class="ph-num">09</span></div>
+    </div>
   </div>
 </section>
 
@@ -407,12 +468,12 @@ footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing
       <div class="service-item reveal d3"><span class="service-name" data-i18n="svc4.name">Kinderhaarschnitt</span><span class="service-desc" data-i18n="svc4.desc">Für unsere jüngsten Gäste bis 12 Jahre</span><span class="service-dots"></span><span class="service-price" data-i18n="svc4.price">ab 15 €</span></div>
       <div class="service-item reveal d3"><span class="service-name" data-i18n="svc5.name">Augenbrauen &amp; Wax</span><span class="service-desc" data-i18n="svc5.desc">Saubere Konturen, gepflegtes Gesamtbild</span><span class="service-dots"></span><span class="service-price" data-i18n="svc5.price">ab 5 €</span></div>
     </div>
-    <p class="services-note reveal" data-i18n="services.note">Alle Preise sind Richtwerte – sprich uns gerne direkt an.</p>
+    <p class="services-note reveal" data-i18n="services.note">Preise können je nach Aufwand variieren – frag einfach kurz nach.</p>
   </div>
 </section>
 
 <div class="strip">
-  <blockquote class="reveal" data-i18n="strip.quote">„Ein guter Haarschnitt ist kein Luxus – <span>er ist eine Haltung.“</span></blockquote>
+  <blockquote class="reveal" data-i18n="strip.quote">„Komm rein als Kunde – <span>geh raus als Freund.“</span></blockquote>
 </div>
 
 <section id="contact">
@@ -457,8 +518,12 @@ footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing
       </div>
     </div>
     <div class="map-wrap reveal">
+      <div class="map-consent" id="mapConsent">
+        <p data-i18n="map.consent">Beim Laden der Karte werden Daten an Google übertragen. Mehr dazu in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+        <button class="btn btn-gold" id="mapLoadBtn" data-i18n="map.load">Karte laden</button>
+      </div>
       <iframe
-        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2579.6!2d7.5670437!3d49.413603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xf8eeaacad2fae952!2sFriends%20Barbershop!5e0!3m2!1sde!2sde!4v1"
+        data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2579.6!2d7.5670437!3d49.413603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0xf8eeaacad2fae952!2sFriends%20Barbershop!5e0!3m2!1sde!2sde!4v1"
         allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
         title="Friends Barbershop auf Google Maps"></iframe>
     </div>
@@ -478,53 +543,68 @@ footer small{display:block;color:var(--text-dim);font-size:.78rem;letter-spacing
     </svg>
   </a>
   <small>© <span id="year"></span> Friends Barbershop · Kaiserstraße 24 · 66849 Landstuhl</small>
+  <div class="footer-legal">
+    <a href="impressum.html" data-i18n="footer.imprint">Impressum</a><span>·</span><a href="datenschutz.html" data-i18n="footer.privacy">Datenschutz</a>
+  </div>
 </footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Bildansicht">
+  <img src="" alt="Kunstwerk – Friends Barbershop" id="lightboxImg">
+</div>
 
 <script>
 // ---------- i18n ----------
 const I18N = {
   de: {
-    'nav.about':'Über uns','nav.services':'Leistungen','nav.contact':'Kontakt',
-    'hero.sub':'Präzise Schnitte, klassische Bartpflege und ein Ambiente, in dem man gerne sitzen bleibt. Dein Barbershop mitten in Landstuhl.',
+    'nav.about':'Über uns','nav.art':'Kunstwerke','nav.services':'Leistungen','nav.contact':'Kontakt',
+    'gallery.tag':'Galerie','gallery.h2':'Kunstwerke','gallery.sub':'Frisuren, Designs und mehr aus dem Laden.',
+    'hero.sub':'Frischer Schnitt, sauberer Bart – mitten in Landstuhl. Komm vorbei oder ruf kurz durch.',
     'hero.cta1':'Termin vereinbaren','hero.cta2':'Leistungen','hero.scroll':'Scrollen',
-    'about.tag':'Über uns','about.h2':'Handwerk trifft<br>Atmosphäre',
-    'about.p1':'Bei <strong>Friends Barbershop</strong> bekommst du mehr als einen Haarschnitt. Unter den goldenen Hexagon-Lichtern unseres Salons nehmen wir uns Zeit für jedes Detail – vom klassischen Fade bis zur heißen Rasur mit dem Messer.',
-    'about.p2':'Modernes Barbering, ehrliche Beratung und eine Atmosphäre unter Freunden – dafür stehen wir. Komm vorbei, lehn dich zurück und verlass den Stuhl mit einem Lächeln.',
-    'about.stat1':'Leidenschaft','about.stat2':'Barber-Stühle','about.stat3':'Für unsere Gäste',
+    'about.tag':'Über uns','about.h2':'Bei uns bist du<br>unter Freunden',
+    'about.p1':'Der Name ist Programm: Bei <strong>Friends</strong> wirst du nicht abgefertigt, sondern wie ein Kumpel empfangen. Ob Fade, Messer-Rasur oder einfach nachschneiden – wir nehmen uns Zeit dafür.',
+    'about.p2':'Sieben Stühle, ein eingespieltes Team und meistens läuft gute Musik. Komm mit Termin oder einfach spontan vorbei.',
+    'about.stat1':'Google-Bewertung','about.stat2':'Barber-Stühle','about.stat3':'Tage die Woche offen',
     'services.tag':'Leistungen','services.h2':'Unsere Services',
     'svc1.name':'Haarschnitt','svc1.desc':'Schnitt, Styling &amp; Finish – klassisch oder modern','svc1.price':'ab 20 €',
     'svc2.name':'Bart','svc2.desc':'Konturen, Trimmen &amp; Pflege mit heißem Handtuch','svc2.price':'ab 15 €',
     'svc3.name':'Haare + Bart','svc3.desc':'Das Komplettpaket – frisch von Kopf bis Kinn','svc3.price':'ab 30 €',
     'svc4.name':'Kinderhaarschnitt','svc4.desc':'Für unsere jüngsten Gäste bis 12 Jahre','svc4.price':'ab 15 €',
     'svc5.name':'Augenbrauen &amp; Wax','svc5.desc':'Saubere Konturen, gepflegtes Gesamtbild','svc5.price':'ab 5 €',
-    'services.note':'Alle Preise sind Richtwerte – sprich uns gerne direkt an.',
-    'strip.quote':'„Ein guter Haarschnitt ist kein Luxus – <span>er ist eine Haltung.“</span>',
+    'services.note':'Preise können je nach Aufwand variieren – frag einfach kurz nach.',
+    'strip.quote':'„Komm rein als Kunde – <span>geh raus als Freund.“</span>',
     'contact.tag':'Besuch uns','contact.h2':'Öffnungszeiten &amp; Kontakt',
     'day.mon':'Montag','day.tue':'Dienstag','day.wed':'Mittwoch','day.thu':'Donnerstag','day.fri':'Freitag','day.sat':'Samstag','day.sun':'Sonntag','day.closed':'geschlossen',
     'contact.addr':'Adresse','contact.phone':'Telefon','contact.follow':'Folge uns',
     'map.btn':'Route planen – Google Maps',
+    'map.consent':'Beim Laden der Karte werden Daten an Google übertragen. Mehr dazu in der <a href="datenschutz.html">Datenschutzerklärung</a>.',
+    'map.load':'Karte laden',
+    'footer.imprint':'Impressum','footer.privacy':'Datenschutz',
     'badge.today':'Heute'
   },
   en: {
-    'nav.about':'About us','nav.services':'Services','nav.contact':'Contact',
-    'hero.sub':'Precise cuts, classic beard grooming and an atmosphere you won’t want to leave. Your barbershop in the heart of Landstuhl.',
+    'nav.about':'About us','nav.art':'Artworks','nav.services':'Services','nav.contact':'Contact',
+    'gallery.tag':'Gallery','gallery.h2':'Artworks','gallery.sub':'Cuts, designs and more from the shop.',
+    'hero.sub':'Fresh cut, clean beard – right in the middle of Landstuhl. Drop by or give us a quick call.',
     'hero.cta1':'Book appointment','hero.cta2':'Services','hero.scroll':'Scroll',
-    'about.tag':'About us','about.h2':'Craftsmanship meets<br>atmosphere',
-    'about.p1':'At <strong>Friends Barbershop</strong> you get more than a haircut. Under the golden hexagon lights of our salon we take our time for every detail – from a classic fade to a hot towel razor shave.',
-    'about.p2':'Modern barbering, honest advice and an atmosphere among friends – that’s what we stand for. Come by, lean back and leave the chair with a smile.',
-    'about.stat1':'Passion','about.stat2':'Barber chairs','about.stat3':'For our guests',
+    'about.tag':'About us','about.h2':'You’re among<br>friends here',
+    'about.p1':'The name says it all: at <strong>Friends</strong> you’re not rushed through the chair – you’re welcomed like a buddy. Fade, razor shave or just a quick trim, we take our time.',
+    'about.p2':'Seven chairs, a tight team and usually good music playing. Book ahead or just walk in.',
+    'about.stat1':'Google rating','about.stat2':'Barber chairs','about.stat3':'Days open a week',
     'services.tag':'Services','services.h2':'Our Services',
     'svc1.name':'Haircut','svc1.desc':'Cut, styling &amp; finish – classic or modern','svc1.price':'from 20 €',
     'svc2.name':'Beard','svc2.desc':'Contours, trim &amp; hot towel care','svc2.price':'from 15 €',
     'svc3.name':'Hair + Beard','svc3.desc':'The complete package – fresh from head to chin','svc3.price':'from 30 €',
     'svc4.name':'Kids’ haircut','svc4.desc':'For our youngest guests up to age 12','svc4.price':'from 15 €',
     'svc5.name':'Eyebrows &amp; wax','svc5.desc':'Clean contours, a well-groomed look','svc5.price':'from 5 €',
-    'services.note':'All prices are guide prices – feel free to ask us directly.',
-    'strip.quote':'“A good haircut is not a luxury – <span>it’s an attitude.”</span>',
+    'services.note':'Prices can vary a bit depending on the work – just ask.',
+    'strip.quote':'“Come in as a customer – <span>leave as a friend.”</span>',
     'contact.tag':'Visit us','contact.h2':'Opening hours &amp; contact',
     'day.mon':'Monday','day.tue':'Tuesday','day.wed':'Wednesday','day.thu':'Thursday','day.fri':'Friday','day.sat':'Saturday','day.sun':'Sunday','day.closed':'closed',
     'contact.addr':'Address','contact.phone':'Phone','contact.follow':'Follow us',
     'map.btn':'Get directions – Google Maps',
+    'map.consent':'Loading the map transfers data to Google. Learn more in our <a href="datenschutz.html">privacy policy</a>.',
+    'map.load':'Load map',
+    'footer.imprint':'Legal notice','footer.privacy':'Privacy policy',
     'badge.today':'Today'
   }
 };
@@ -558,6 +638,17 @@ langBtn.addEventListener('click', () => {
   applyLang();
 });
 applyLang();
+
+// ---------- Google Maps erst nach Einwilligung laden (DSGVO) ----------
+const mapConsent = document.getElementById('mapConsent');
+const mapIframe = document.querySelector('.map-wrap iframe');
+function loadMap() {
+  if (!mapIframe.src) mapIframe.src = mapIframe.dataset.src;
+  mapConsent.style.display = 'none';
+  localStorage.setItem('fb-maps-consent', '1');
+}
+document.getElementById('mapLoadBtn').addEventListener('click', loadMap);
+if (localStorage.getItem('fb-maps-consent')) loadMap();
 
 // ---------- sticky nav ----------
 const nav = document.getElementById('nav');
@@ -597,6 +688,37 @@ const io = new IntersectionObserver(entries => {
   });
 }, {threshold:.15, rootMargin:'0px 0px -40px 0px'});
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// ---------- Galerie: Bilder laden, falls vorhanden (kunst1.jpg … kunst9.jpg) ----------
+document.querySelectorAll('.art-item').forEach(el => {
+  const img = new Image();
+  img.onload = () => {
+    el.style.backgroundImage = `url('${el.dataset.src}')`;
+    el.classList.add('has-img');
+  };
+  img.src = el.dataset.src;
+});
+
+// ---------- Lightbox: Klick vergrößert, Klick daneben schließt ----------
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+
+function closeLightbox() {
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.art-item').forEach(el => {
+  el.addEventListener('click', () => {
+    if (!el.classList.contains('has-img')) return;
+    lightboxImg.src = el.dataset.src;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+});
+lightbox.addEventListener('click', e => {
+  if (e.target !== lightboxImg) closeLightbox();
+});
+addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
 document.getElementById('year').textContent = new Date().getFullYear();
 </script>
